@@ -4,6 +4,9 @@
 
 This is a fork from [front-vue-exercise](https://github.com/Ideaminds/front-vue-exercise) by Interapedia. In this fork, you will find the features to be implemented.
 
+##Go to the Project
+You can click in this [link](https://brave-kirch-0bb5a0.netlify.app/) to go to the project or follow to the url below:
+- https://brave-kirch-0bb5a0.netlify.app/
 ## Technologies used
 
 - VueJS Front End Javascript Framework ([Vue.js](https://vuejs.org/))
