@@ -1,20 +1,30 @@
 <template>
   <div
     id="app-main"
-    class="px-4 pt-4 text-white min-h-screen"
-    style="background-color: #0f172a"
+    class="px-4 pt-4 text-indigo-50 min-h-screen bg-slate-900 grid items-center"
   >
-    <h1 class="text-center font-bold text-2xl border-2 rounded mb-4">TIC TAC TOE</h1>
-    <div class="grid grid-rows-3 grid-cols-3 gap-2 mb-4" style="aspect-ratio: 1 / 1">
+    <h1
+      class="text-center text-2xl border-2 border-indigo-300 rounded mb-4 text-indigo-200"
+    >
+      TIC TAC TOE
+    </h1>
+    <p class="text-slate-600 bg-slate-800 mb-4 px-4 py-1 rounded text-center">
+      {{ isOnePlayer ? "one player" : "two players" }}
+      <i class="fas fa-user"></i>
+      <i class="fas fa-user" v-if="!isOnePlayer"></i>
+    </p>
+    <div
+      class="grid grid-rows-3 grid-cols-3 gap-2 mb-4"
+      style="aspect-ratio: 1 / 1"
+    >
       <div
         v-for="(value, key) in values"
         :key="key"
-        @click="isOnePlayer ? playAlone(key) : play(key)"
-        class="bg-pink-600 hover:bg-pink-700 bg-stripes-pink rounded flex justify-center items-center"
-        
+        @click="isOnePlayer ? play(key) : playAlone(key)"
+        class="bg-pink-800 hover:bg-pink-700 rounded flex justify-center items-center"
       >
         <span v-if="!value">{{ value }}</span>
-        <i v-else :class="`${turn[value]} text-4xl`" ></i>
+        <i v-else :class="`${turn[value]} text-4xl`"></i>
       </div>
     </div>
     <menu-board
@@ -31,6 +41,16 @@
       v-on:handle-restart="setValues"
       v-if="!!winner"
     /> -->
+    <footer class="text-xs text-slate-700 text-center flex flex-col">
+      <span
+        >developed by
+        <a href="https://github.com/AlbertDeHoz/front-vue-exercise" class="text-slate-600"
+          >AlbertDeHoz{<i class="fab fa-github"></i>}</a
+        >
+        with <i class="fas fa-heart"></i
+      ></span>
+      <!-- <span>Follow me at github <i class="fab fa-github"></i></span> -->
+    </footer>
   </div>
 </template>
 
@@ -41,10 +61,10 @@ import MenuBoard from "./components/MenuBoard";
 export default {
   name: "App",
 
-  components: { MenuBoard },//,  ModalWinner},
+  components: { MenuBoard }, //,  ModalWinner},
 
   data: () => ({
-    isOnePlayer: false,
+    isOnePlayer: true,
     turn: { X: "fa fa-times", O: "fa fa-circle" },
     history: [],
     values: {
@@ -90,7 +110,6 @@ export default {
       this.history.pop();
       const lastIndex = this.history.length - 1;
       this.setValues({ ...this.history[lastIndex] });
-      console.log(this.history);
     },
 
     getEmptySlots() {
@@ -107,7 +126,6 @@ export default {
       // this.history.length == 0 means no movements yet
       // '!values' means reset values due to 'handle-restart' sets the 'values' params as null
       // 'this.winner' means a player has won
-      console.log(values);
       const isValuesEmpty =
         Object.keys(values).length === 0 && values.constructor === Object;
 
@@ -126,7 +144,6 @@ export default {
 
     playAlone(key) {
       this.play(key);
-      console.log(this.getEmptySlots().length);
       if (this.getEmptySlots().length !== 0) {
         this.makeOneMove();
       }
@@ -138,7 +155,6 @@ export default {
         this.current = this.current === "X" ? "O" : "X";
         this.winner = this.calculateWinner(this.values);
         this.history.push({ ...this.values });
-        console.log(this.history);
       }
     },
 
@@ -175,5 +191,4 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
 </style>

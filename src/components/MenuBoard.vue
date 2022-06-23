@@ -1,16 +1,16 @@
 <template>
-  <div>
-    <button :class="classStyles" @click="emitOneMove">play one move</button>
-    <button :class="classStyles" @click="emitBackMove" v-if="!winner">Back one move</button>
-    <button :class="classStyles" @click="emitRestart">Restart Game</button>
-    <button :class="classStyles" @click="emitPlayAlone">{{isOnePlayer?"Set Two Player":"Set One Player"}}</button>
+  <div class="grid grid-cols-3 gap-2 mb-4">
+    <button :class="classStyles" @click="emitBackMove" :disabled="!!winner"><i class="fas fa-step-backward"></i></button>
+    <button :class="classStyles" @click="emitOneMove" title="play one move" :disabled="!!winner"><i class="fas fa-play"></i></button>
+    <button :class="classStyles" @click="emitRestart"><i class="fas fa-undo"></i></button>
+    <button :class="classStyles" @click="emitPlayAlone" style="grid-column: 1 / span 3">{{isOnePlayer?"Set Two Player":"Set One Player"}}</button>
   </div>
 </template>
 
 <script>
 export default {
 data: () => ({
-    classStyles:"bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded"
+    classStyles:"hover:bg-indigo-500 text-indigo-400 bg-indigo-900 hover:text-indigo-50 py-2 px-4 rounded disabled:bg-slate-800 disabled:text-slate-600 "
 }),
 
 
@@ -23,7 +23,6 @@ props:{
 methods: {
     emitOneMove() {
         this.$emit("handle-move");
-        //console.log("Hello");
     },
 
 
