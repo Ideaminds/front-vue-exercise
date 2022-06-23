@@ -1,5 +1,5 @@
 <template>
-  <div class="absolute bottom-0 left-0 bg-gray-900 w-full h-full opacity-50 flex">
+  <div class="">
     <div class="bg-white w-6/12  mx-auto my-auto flex flex-col opacity-100 py-5">
       <div class="mb-2 mx-auto">The player {{winner}} has won</div>
       <button :class="buttonStyle" @click="emitRestart" >Restart</button>
