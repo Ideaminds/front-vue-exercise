@@ -1,26 +1,26 @@
 <template>
   <div
     id="app-main"
-    class="px-4 pt-4 text-indigo-50 min-h-screen bg-slate-900 grid items-center"
+    class="app px-4 pt-4 text-indigo-50 min-h-screen bg-slate-900 grid gap-4 items-center mx-auto sm:max-w-xl lg:max-w-5xl"
   >
     <h1
       class="text-center text-2xl border-2 border-indigo-300 rounded mb-4 text-indigo-200"
     >
       TIC TAC TOE
     </h1>
-    <p class="text-slate-600 bg-slate-800 mb-4 px-4 py-1 rounded text-center">
-      {{ isOnePlayer ? "one player" : "two players" }}
+    <p class="info text-slate-600 bg-slate-800 mb-4 px-4 py-1 rounded text-center">
+      {{ isPlayAlone ? "play alone" : "two players" }}
       <i class="fas fa-user"></i>
-      <i class="fas fa-user" v-if="!isOnePlayer"></i>
+      <i class="fas fa-user" v-if="!isPlayAlone"></i>
     </p>
     <div
-      class="grid grid-rows-3 grid-cols-3 gap-2 mb-4"
+      class="board grid grid-rows-3 grid-cols-3 gap-2 mb-4 lg:w-3/4"
       style="aspect-ratio: 1 / 1"
     >
       <div
         v-for="(value, key) in values"
         :key="key"
-        @click="isOnePlayer ? play(key) : playAlone(key)"
+        @click="!isPlayAlone ? play(key) : playAlone(key)"
         class="bg-pink-800 hover:bg-pink-700 rounded flex justify-center items-center"
       >
         <span v-if="!value">{{ value }}</span>
@@ -32,15 +32,15 @@
       v-on:handle-back="backOneMove"
       v-on:handle-restart="setValues"
       v-on:handle-play-alone="setOnePlayer"
-      :isOnePlayer="isOnePlayer"
-      :winner="winner"
+      :isPlayAlone="isPlayAlone"
+      :winner="turn[winner]"
+      class="menu"
     />
-    <!-- 
     <modal-winner
-      :winner="winner"
-      v-on:handle-restart="setValues"
+      :winner="turn[winner]"
       v-if="!!winner"
-    /> -->
+      v-on:handle-restart="setValues"
+    />
     <footer class="text-xs text-slate-700 text-center flex flex-col">
       <span
         >developed by
@@ -49,22 +49,21 @@
         >
         with <i class="fas fa-heart"></i
       ></span>
-      <!-- <span>Follow me at github <i class="fab fa-github"></i></span> -->
     </footer>
   </div>
 </template>
 
 <script>
-// import ModalWinner from "./components/ModalWinner";
+import ModalWinner from "./components/ModalWinner";
 import MenuBoard from "./components/MenuBoard";
 
 export default {
   name: "App",
 
-  components: { MenuBoard }, //,  ModalWinner},
+  components: { MenuBoard, ModalWinner},
 
   data: () => ({
-    isOnePlayer: true,
+    isPlayAlone: false,
     turn: { X: "fa fa-times", O: "fa fa-circle" },
     history: [],
     values: {
@@ -95,7 +94,7 @@ export default {
 
   methods: {
     setOnePlayer() {
-      this.isOnePlayer = !this.isOnePlayer;
+      this.isPlayAlone = !this.isPlayAlone;
     },
 
     makeOneMove() {
@@ -142,11 +141,17 @@ export default {
       this.winner = this.calculateWinner(this.values);
     },
 
-    playAlone(key) {
+    async playAlone(key) {
       this.play(key);
       if (this.getEmptySlots().length !== 0) {
+        // await this.sleep(500);
+        
         this.makeOneMove();
       }
+    },
+
+    sleep(time) {
+      return new Promise(resolve => setTimeout(resolve, time))
     },
 
     play(key) {
@@ -191,4 +196,47 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+.app h1 {
+  grid-area:title;
+}
+
+.app .info {
+  grid-area: info;
+  align-self: end;
+}
+ 
+.app .board {
+  grid-area: board;
+}
+
+.app .menu {
+  grid-area: menu;
+  align-self: start;
+}
+.app footer {
+  grid-area: footer;
+}
+
+.app {
+  grid-template-areas: 
+  "title"
+  "info"
+  "board"
+  "menu"
+  "footer";
+}
+
+@media (min-width: 64rem) {
+  .app {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-areas:
+      "title title title"
+      "board board info"
+      "board board menu"
+      "footer footer footer";
+  }
+}
+
+
 </style>
