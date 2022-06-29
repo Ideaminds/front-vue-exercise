@@ -8,7 +8,9 @@
     >
       TIC TAC TOE
     </h1>
-    <p class="info text-slate-600 bg-slate-800 mb-4 px-4 py-1 rounded text-center">
+    <p
+      class="info text-slate-600 bg-slate-800 mb-4 px-4 py-1 rounded text-center"
+    >
       {{ isPlayAlone ? "play alone" : "two players" }}
       <i class="fas fa-user"></i>
       <i class="fas fa-user" v-if="!isPlayAlone"></i>
@@ -20,31 +22,34 @@
       <div
         v-for="(value, key) in values"
         :key="key"
-        @click="!isPlayAlone ? play(key) : playAlone(key)"
+        @click="!isPlayAlone ? twoPlayers(key): playAlone(key)"
         class="bg-pink-800 hover:bg-pink-700 rounded flex justify-center items-center"
       >
         <span v-if="!value">{{ value }}</span>
         <i v-else :class="`${turn[value]} text-4xl`"></i>
       </div>
+    <pre>{{`${previous}, ${current}`}}</pre>
     </div>
     <menu-board
       v-on:handle-move="makeOneMove"
       v-on:handle-back="backOneMove"
-      v-on:handle-restart="setValues"
+      v-on:handle-restart="restartValues"
       v-on:handle-play-alone="setOnePlayer"
       :isPlayAlone="isPlayAlone"
       :winner="turn[winner]"
       class="menu"
     />
-    <modal-winner
+    <!-- <modal-winner
       :winner="turn[winner]"
       v-if="!!winner"
       v-on:handle-restart="setValues"
-    />
+    /> -->
     <footer class="text-xs text-slate-700 text-center flex flex-col">
       <span
         >developed by
-        <a href="https://github.com/AlbertDeHoz/front-vue-exercise" class="text-slate-600"
+        <a
+          href="https://github.com/AlbertDeHoz/front-vue-exercise"
+          class="text-slate-600"
           >AlbertDeHoz{<i class="fab fa-github"></i>}</a
         >
         with <i class="fas fa-heart"></i
@@ -54,13 +59,16 @@
 </template>
 
 <script>
-import ModalWinner from "./components/ModalWinner";
+// import ModalWinner from "./components/ModalWinner";
 import MenuBoard from "./components/MenuBoard";
 
 export default {
   name: "App",
 
-  components: { MenuBoard, ModalWinner},
+  components: {
+    MenuBoard,
+    // ModalWinner
+  },
 
   data: () => ({
     isPlayAlone: false,
@@ -89,23 +97,45 @@ export default {
       9: "border-t-4 border-l-4",
     },
     current: "X",
+    previous: "O",
     winner: null,
   }),
 
   methods: {
+    restartValues(valuesDefault){
+      this.setValues(valuesDefault);
+      this.current="X";
+      this.previous = "O";
+    },
+    
     setOnePlayer() {
       this.isPlayAlone = !this.isPlayAlone;
     },
 
-    makeOneMove() {
+    toggleCurrent() {
+      this.current = this.current === "X" ? "O" : "X";
+    },
+
+    togglePrevious() {
+      this.previous = this.previous !== "O" ? "O" : "X";
+      console.log('once')
+    },
+
+    makeOneMove(previousMove) {
       const emptySlots = this.getEmptySlots();
       const randomNumber = Math.floor(Math.random() * emptySlots.length);
       const key = emptySlots[randomNumber];
-      this.play(key);
+      return new Promise((resolve) => {
+        if (previousMove) {
+          setTimeout(()=>{
+            // this.play(key)
+            resolve(this.play(key))
+          },1000);
+        }
+      });
     },
 
     backOneMove() {
-      this.current = this.current === "X" ? "O" : "X";
       this.history.pop();
       const lastIndex = this.history.length - 1;
       this.setValues({ ...this.history[lastIndex] });
@@ -128,39 +158,45 @@ export default {
       const isValuesEmpty =
         Object.keys(values).length === 0 && values.constructor === Object;
 
-      if (this.history.length == 0 || isValuesEmpty || this.winner) {
+      if (this.history.length == 0 || (isValuesEmpty && this.winner)) {
         for (let key = 1; key <= 9; key++) {
           this.values[key] = "";
           this.history = [];
           this.current = "X";
           this.winner = this.calculateWinner(this.values);
         }
-        return 0;
+        return;
       }
       this.values = values;
       this.winner = this.calculateWinner(this.values);
     },
 
     async playAlone(key) {
-      this.play(key);
-      if (this.getEmptySlots().length !== 0) {
-        // await this.sleep(500);
-        
-        this.makeOneMove();
+      if (this.current === this.previous) {
+        return
       }
+      const playerMove = this.play(key);
+      await this.makeOneMove(playerMove)
+    },
+
+    twoPlayers(key) {
+      this.play(key);
+      this.togglePrevious();
     },
 
     sleep(time) {
-      return new Promise(resolve => setTimeout(resolve, time))
+      return new Promise((resolve) => setTimeout(resolve, time));
     },
 
     play(key) {
-      if (!this.values[key] && !this.winner) {
-        this.values[key] = this.current;
-        this.current = this.current === "X" ? "O" : "X";
-        this.winner = this.calculateWinner(this.values);
-        this.history.push({ ...this.values });
+      if (this.values[key] || !!this.winner) {
+        return;
       }
+      this.values[key] = this.current;
+      this.winner = this.calculateWinner(this.values);
+      this.history.push({ ...this.values });
+      this.toggleCurrent();
+      return true;
     },
 
     /*
@@ -198,14 +234,14 @@ export default {
 }
 
 .app h1 {
-  grid-area:title;
+  grid-area: title;
 }
 
 .app .info {
   grid-area: info;
   align-self: end;
 }
- 
+
 .app .board {
   grid-area: board;
 }
@@ -219,12 +255,12 @@ export default {
 }
 
 .app {
-  grid-template-areas: 
-  "title"
-  "info"
-  "board"
-  "menu"
-  "footer";
+  grid-template-areas:
+    "title"
+    "info"
+    "board"
+    "menu"
+    "footer";
 }
 
 @media (min-width: 64rem) {
@@ -237,6 +273,4 @@ export default {
       "footer footer footer";
   }
 }
-
-
 </style>
