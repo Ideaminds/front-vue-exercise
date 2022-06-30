@@ -22,13 +22,12 @@
       <div
         v-for="(value, key) in values"
         :key="key"
-        @click="!isPlayAlone ? twoPlayers(key): playAlone(key)"
+        @click="!isPlayAlone ? play(key) : playAlone(key)"
         class="bg-pink-800 hover:bg-pink-700 rounded flex justify-center items-center"
       >
         <span v-if="!value">{{ value }}</span>
         <i v-else :class="`${turn[value]} text-4xl`"></i>
       </div>
-    <pre>{{`${previous}, ${current}`}}</pre>
     </div>
     <menu-board
       v-on:handle-move="makeOneMove"
@@ -39,11 +38,11 @@
       :winner="turn[winner]"
       class="menu"
     />
-    <!-- <modal-winner
+    <modal-winner
       :winner="turn[winner]"
       v-if="!!winner"
-      v-on:handle-restart="setValues"
-    /> -->
+      v-on:handle-restart="restartValues"
+    />
     <footer class="text-xs text-slate-700 text-center flex flex-col">
       <span
         >developed by
@@ -59,7 +58,7 @@
 </template>
 
 <script>
-// import ModalWinner from "./components/ModalWinner";
+import ModalWinner from "./components/ModalWinner";
 import MenuBoard from "./components/MenuBoard";
 
 export default {
@@ -67,14 +66,15 @@ export default {
 
   components: {
     MenuBoard,
-    // ModalWinner
+    ModalWinner,
   },
 
   data: () => ({
     isPlayAlone: false,
     turn: { X: "fa fa-times", O: "fa fa-circle" },
     history: [],
-    values: {
+    values: {},
+    defaultValues: {
       1: "",
       2: "",
       3: "",
@@ -96,43 +96,38 @@ export default {
       8: "border-l-4 border-t-4 border-r-4",
       9: "border-t-4 border-l-4",
     },
-    current: "X",
-    previous: "O",
+    currentPlayer: "X",
+    machinePlayer: "O",
     winner: null,
   }),
 
+  mounted() {
+    this.values = { ...this.defaultValues };
+  },
+
   methods: {
-    restartValues(valuesDefault){
-      this.setValues(valuesDefault);
-      this.current="X";
-      this.previous = "O";
+    restartValues() {
+      this.setValues({ ...this.defaultValues });
+      this.currentPlayer = "X";
+      this.machinePlayer = "O";
     },
-    
+
     setOnePlayer() {
       this.isPlayAlone = !this.isPlayAlone;
+      this.restartValues();
     },
 
     toggleCurrent() {
-      this.current = this.current === "X" ? "O" : "X";
+      this.currentPlayer = this.currentPlayer === "X" ? "O" : "X";
     },
 
-    togglePrevious() {
-      this.previous = this.previous !== "O" ? "O" : "X";
-      console.log('once')
-    },
-
-    makeOneMove(previousMove) {
+    makeOneMove() {
       const emptySlots = this.getEmptySlots();
       const randomNumber = Math.floor(Math.random() * emptySlots.length);
       const key = emptySlots[randomNumber];
-      return new Promise((resolve) => {
-        if (previousMove) {
-          setTimeout(()=>{
-            // this.play(key)
-            resolve(this.play(key))
-          },1000);
-        }
-      });
+      setTimeout(() => {
+        this.play(key);
+      }, 300);
     },
 
     backOneMove() {
@@ -154,45 +149,33 @@ export default {
     setValues({ ...values }) {
       // this.history.length == 0 means no movements yet
       // '!values' means reset values due to 'handle-restart' sets the 'values' params as null
-      // 'this.winner' means a player has won
       const isValuesEmpty =
         Object.keys(values).length === 0 && values.constructor === Object;
-
       if (this.history.length == 0 || (isValuesEmpty && this.winner)) {
         for (let key = 1; key <= 9; key++) {
           this.values[key] = "";
           this.history = [];
-          this.current = "X";
+          this.currentPlayer = "X";
           this.winner = this.calculateWinner(this.values);
         }
-        return;
       }
       this.values = values;
       this.winner = this.calculateWinner(this.values);
     },
 
-    async playAlone(key) {
-      if (this.current === this.previous) {
-        return
+    playAlone(key) {
+      if (this.currentPlayer === this.machinePlayer) {
+        return;
       }
       const playerMove = this.play(key);
-      await this.makeOneMove(playerMove)
-    },
-
-    twoPlayers(key) {
-      this.play(key);
-      this.togglePrevious();
-    },
-
-    sleep(time) {
-      return new Promise((resolve) => setTimeout(resolve, time));
+      this.makeOneMove(playerMove);
     },
 
     play(key) {
       if (this.values[key] || !!this.winner) {
         return;
       }
-      this.values[key] = this.current;
+      this.values[key] = this.currentPlayer;
       this.winner = this.calculateWinner(this.values);
       this.history.push({ ...this.values });
       this.toggleCurrent();
@@ -200,7 +183,7 @@ export default {
     },
 
     /*
-     * calculateWinner  receives the status of the current value
+     * calculateWinner  receives the status of the currentPlayer value
      * and returns a winner if it exists
      */
     calculateWinner(values) {

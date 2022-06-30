@@ -10,18 +10,7 @@
 <script>
 export default {
 data: () => ({
-    classStyles:"hover:bg-indigo-500 text-indigo-400 bg-indigo-900 hover:text-indigo-50 py-2 px-4 rounded disabled:bg-slate-800 disabled:text-slate-600 sm:text-xl",
-    values: {
-      1: "",
-      2: "",
-      3: "",
-      4: "",
-      5: "",
-      6: "",
-      7: "",
-      8: "",
-      9: "",
-    },
+    classStyles:"hover:bg-indigo-500 text-indigo-400 bg-indigo-900 hover:text-indigo-50 py-2 px-4 rounded disabled:bg-slate-800 disabled:text-slate-600 sm:text-xl"
 }),
 
 
@@ -43,7 +32,7 @@ methods: {
 
 
     emitRestart() {
-        this.$emit("handle-restart", this.values);
+        this.$emit("handle-restart");
     },
 
     emitPlayAlone() {
